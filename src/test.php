@@ -89,6 +89,7 @@ class Test
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $totalTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
         curl_close($ch);
 
         // Separar cabeçalhos do corpo da resposta
@@ -98,7 +99,8 @@ class Test
         return [
             "httpCode" => $httpCode,
             "headers" => $headers,
-            "response" => $body
+            "response" => $body,
+            "totalTime" => $totalTime
         ];
     }
 }
