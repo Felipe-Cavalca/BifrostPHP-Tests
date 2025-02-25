@@ -37,7 +37,7 @@ class Test
 
         $validate = $this->validate();
         if ($validate === true) {
-            $result = $this->curl();
+            $result[] = $this->validateResponse($this->curl());
         } else {
             $result["status"] = false;
             $result["message"] = $validate;
@@ -102,5 +102,74 @@ class Test
             "response" => $body,
             "totalTime" => $totalTime
         ];
+    }
+
+    private function validateResponse(array $response): array|null
+    {
+        $resultTests = [];
+
+        if ($this->tests == null) {
+            return [];
+        }
+
+        if ($this->tests["status_code"]) {
+            $resultTests[] = [
+                "name" => "Status Code",
+                "status" => $response["httpCode"] == $this->tests["status_code"],
+                "expected" => $this->tests["status_code"],
+                "received" => $response["httpCode"]
+            ];
+        }
+
+        if ($this->tests["status_code_in"]) {
+            $resultTests[] = [
+                "name" => "Status Code In",
+                "status" => in_array($response["httpCode"], $this->tests["status_code_in"]),
+                "expected" => $this->tests["status_code_in"],
+                "received" => $response["httpCode"]
+            ];
+        }
+
+        if ($this->tests["status_code_in_range"]) {
+            $resultTests[] = [
+                "name" => "Status Code In Range",
+                "status" => $response["httpCode"] >= $this->tests["status_code_in_range"][0] && $response["httpCode"] <= $this->tests["status_code_in_range"][1],
+                "expected" => $this->tests["status_code_in_range"],
+                "received" => $response["httpCode"]
+            ];
+        }
+
+        if ($this->tests["headers"]) {
+            foreach ($this->tests["headers"] as $key => $value) {
+                if (isset($response["headers"][$key]) == false) {
+                    $resultTests[] = [
+                        "name" => "Header " . $key,
+                        "status" => false,
+                        "expected" => $value,
+                        "received" => null
+                    ];
+                    continue;
+                }
+                $resultTests[] = [
+                    "name" => "Header " . $key,
+                    "status" => $response["headers"][$key] == $value,
+                    "expected" => $value,
+                    "received" => $response["headers"][$key]
+                ];
+            }
+        }
+
+        if ($this->tests["headers_contains"]) {
+            $headersReceived = array_keys($response["headers"]);
+            foreach ($this->tests["headers_contains"] as $value) {
+                $resultTests[] = [
+                    "name" => "Header Contains " . $value,
+                    "status" => in_array($value, $headersReceived),
+                    "expected" => $value
+                ];
+            }
+        }
+
+        return $resultTests;
     }
 }
