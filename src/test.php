@@ -200,6 +200,15 @@ class Test
             }
         }
 
+        if ($this->tests["response_time_max"]) {
+            $resultTests[] = [
+                "name" => "Response Time Max",
+                "status" => $response["totalTime"] <= $this->tests["response_time_max"],
+                "expected" => $this->tests["response_time_max"],
+                "received" => $response["totalTime"]
+            ];
+        }
+
         return $resultTests;
     }
 }
