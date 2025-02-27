@@ -99,7 +99,7 @@ class Test
         return [
             "httpCode" => $httpCode,
             "headers" => $headers,
-            "response" => $body,
+            "response" => json_decode($body, true),
             "totalTime" => $totalTime
         ];
     }
@@ -166,6 +166,36 @@ class Test
                     "name" => "Header Contains " . $value,
                     "status" => in_array($value, $headersReceived),
                     "expected" => $value
+                ];
+            }
+        }
+
+        if ($this->tests["body"]) {
+            $resultTests[] = [
+                "name" => "Body",
+                "status" => $response["response"] == $this->tests["body"],
+                "expected" => $this->tests["body"],
+                "received" => $response["response"]
+            ];
+        }
+
+        if ($this->tests["body_contains"]) {
+            foreach ($this->tests["body_contains"] as $value) {
+                $resultTests[] = [
+                    "name" => "Body Contains " . $value,
+                    "status" => isset($response["response"][$value]),
+                    "expected" => $value
+                ];
+            }
+        }
+
+        if ($this->tests["body_contains_value"]) {
+            foreach ($this->tests["body_contains_value"] as $key => $value) {
+                $resultTests[] = [
+                    "name" => "Body Contains Value " . $value . " in " . $key,
+                    "status" => $response["response"][$key] == $value,
+                    "expected" => $value,
+                    "received" => $response["response"][$key]
                 ];
             }
         }
