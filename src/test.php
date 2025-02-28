@@ -179,7 +179,7 @@ class Test
             ];
         }
 
-        if (isset($this->tests["body"]) && $this->tests["body_contains"]) {
+        if (isset($response["response"]) && $this->tests["body_contains"]) {
             foreach ($this->tests["body_contains"] as $value) {
                 $resultTests[] = [
                     "name" => "Body Contains " . $value,
@@ -189,7 +189,7 @@ class Test
             }
         }
 
-        if (isset($this->tests["body"]) && $this->tests["body_contains_value"]) {
+        if (isset($response["response"]) && $this->tests["body_contains_value"]) {
             foreach ($this->tests["body_contains_value"] as $key => $value) {
                 $resultTests[] = [
                     "name" => "Body Contains Value " . $value . " in " . $key,
@@ -209,7 +209,7 @@ class Test
             ];
         }
 
-        if (isset($this->tests["body"]) &&  $this->tests["json_schema"]) {
+        if (isset($response["response"]) &&  $this->tests["json_schema"]) {
             $resultTests[] = [
                 "name" => "Json Schema",
                 "status" => $this->validateJsonSchema($response["response"], $this->tests["json_schema"]),
