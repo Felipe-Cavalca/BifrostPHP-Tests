@@ -258,6 +258,10 @@ class Test
                 if (!is_int($data)) {
                     return false;
                 }
+            } elseif ($type === 'number') {
+                if (!is_numeric($data)) {
+                    return false;
+                }
             } elseif ($type === 'boolean') {
                 if (!is_bool($data)) {
                     return false;
