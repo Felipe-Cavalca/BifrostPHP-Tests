@@ -209,7 +209,7 @@ class Test
             ];
         }
 
-        if (isset($response["response"]) &&  $this->tests["json_schema"]) {
+        if (isset($response["response"]) && $this->tests["json_schema"]) {
             $resultTests[] = [
                 "name" => "Json Schema",
                 "status" => $this->validateJsonSchema($response["response"], $this->tests["json_schema"]),
