@@ -209,6 +209,61 @@ class Test
             ];
         }
 
+        if (isset($this->tests["json_schema"]) && !empty($this->tests["json_schema"])) {
+            $resultTests[] = [
+                "name" => "Json Schema",
+                "status" => $this->validateJsonSchema($response["response"], $this->tests["json_schema"]),
+                "expected" => $this->tests["json_schema"],
+                "received" => $response["response"]
+            ];
+        }
+
         return $resultTests;
+    }
+
+    private function validateJsonSchema(mixed $data, array $schema): bool
+    {
+        if (isset($schema['type'])) {
+            $type = $schema['type'];
+            if ($type === 'object') {
+                if (!is_array($data)) {
+                    return false;
+                }
+                if (isset($schema['properties'])) {
+                    foreach ($schema['properties'] as $key => $propertySchema) {
+                        if (isset($propertySchema['required']) && $propertySchema['required'] && !isset($data[$key])) {
+                            return false;
+                        }
+                        if (isset($data[$key]) && !$this->validateJsonSchema($data[$key], $propertySchema)) {
+                            return false;
+                        }
+                    }
+                }
+            } elseif ($type === 'array') {
+                if (!is_array($data)) {
+                    return false;
+                }
+                if (isset($schema['items'])) {
+                    foreach ($data as $item) {
+                        if (!$this->validateJsonSchema($item, $schema['items'])) {
+                            return false;
+                        }
+                    }
+                }
+            } elseif ($type === 'string') {
+                if (!is_string($data)) {
+                    return false;
+                }
+            } elseif ($type === 'integer') {
+                if (!is_int($data)) {
+                    return false;
+                }
+            } elseif ($type === 'boolean') {
+                if (!is_bool($data)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
