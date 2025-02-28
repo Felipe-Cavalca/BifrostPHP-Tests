@@ -18,7 +18,7 @@ class Test
     public function __construct(array $setup)
     {
         $this->config = Config::getInstance();
-        $this->setup = array_merge($this->config->settings, $setup);
+        $this->setup = $this->array_merge_recursive_distinct($this->config->settings, $setup);
     }
 
     public function __get($name)
@@ -112,7 +112,7 @@ class Test
             return [];
         }
 
-        if ($this->tests["status_code"]) {
+        if (isset($this->tests["status_code"])) {
             $resultTests[] = [
                 "name" => "Status Code",
                 "status" => $response["httpCode"] == $this->tests["status_code"],
@@ -121,7 +121,7 @@ class Test
             ];
         }
 
-        if ($this->tests["status_code_in"]) {
+        if (isset($this->tests["status_code_in"])) {
             $resultTests[] = [
                 "name" => "Status Code In",
                 "status" => in_array($response["httpCode"], $this->tests["status_code_in"]),
@@ -130,7 +130,7 @@ class Test
             ];
         }
 
-        if ($this->tests["status_code_in_range"]) {
+        if (isset($this->tests["status_code_in_range"])) {
             $resultTests[] = [
                 "name" => "Status Code In Range",
                 "status" => $response["httpCode"] >= $this->tests["status_code_in_range"][0] && $response["httpCode"] <= $this->tests["status_code_in_range"][1],
@@ -139,7 +139,7 @@ class Test
             ];
         }
 
-        if ($this->tests["headers"]) {
+        if (isset($this->tests["headers"])) {
             foreach ($this->tests["headers"] as $key => $value) {
                 if (isset($response["headers"][$key]) == false) {
                     $resultTests[] = [
@@ -159,7 +159,7 @@ class Test
             }
         }
 
-        if ($this->tests["headers_contains"]) {
+        if (isset($this->tests["headers_contains"])) {
             $headersReceived = array_keys($response["headers"]);
             foreach ($this->tests["headers_contains"] as $value) {
                 $resultTests[] = [
@@ -170,7 +170,7 @@ class Test
             }
         }
 
-        if ($this->tests["body"]) {
+        if (isset($this->tests["body"])) {
             $resultTests[] = [
                 "name" => "Body",
                 "status" => $response["response"] == $this->tests["body"],
@@ -179,7 +179,15 @@ class Test
             ];
         }
 
-        if (isset($response["response"]) && $this->tests["body_contains"]) {
+        if (isset($this->tests["body_contains"])) {
+            if (!isset($response["response"])) {
+                $resultTests[] = [
+                    "name" => "Body Contains",
+                    "status" => false,
+                    "expected" => $this->tests["body_contains"],
+                    "received" => null
+                ];
+            }
             foreach ($this->tests["body_contains"] as $value) {
                 $resultTests[] = [
                     "name" => "Body Contains " . $value,
@@ -189,18 +197,26 @@ class Test
             }
         }
 
-        if (isset($response["response"]) && $this->tests["body_contains_value"]) {
+        if (isset($this->tests["body_contains_value"])) {
+            if (!isset($response["response"])) {
+                $resultTests[] = [
+                    "name" => "Body Contains Value",
+                    "status" => false,
+                    "expected" => $this->tests["body_contains_value"],
+                    "received" => null
+                ];
+            }
             foreach ($this->tests["body_contains_value"] as $key => $value) {
                 $resultTests[] = [
                     "name" => "Body Contains Value " . $value . " in " . $key,
-                    "status" => $response["response"][$key] == $value,
+                    "status" => isset($response["response"][$key]) && $response["response"][$key] == $value,
                     "expected" => $value,
-                    "received" => $response["response"][$key]
+                    "received" => $response["response"][$key] ?? null
                 ];
             }
         }
 
-        if ($this->tests["response_time_max"]) {
+        if (isset($this->tests["response_time_max"])) {
             $resultTests[] = [
                 "name" => "Response Time Max",
                 "status" => $response["totalTime"] <= $this->tests["response_time_max"],
@@ -209,7 +225,7 @@ class Test
             ];
         }
 
-        if (isset($response["response"]) && $this->tests["json_schema"]) {
+        if (isset($response["response"]) && isset($this->tests["json_schema"])) {
             $resultTests[] = [
                 "name" => "Json Schema",
                 "status" => $this->validateJsonSchema($response["response"], $this->tests["json_schema"]),
@@ -269,5 +285,20 @@ class Test
             }
         }
         return true;
+    }
+
+    private function array_merge_recursive_distinct(array $array1, array $array2): array
+    {
+        $merged = $array1;
+
+        foreach ($array2 as $key => $value) {
+            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+                $merged[$key] = $this->array_merge_recursive_distinct($merged[$key], $value);
+            } else {
+                $merged[$key] = $value;
+            }
+        }
+
+        return $merged;
     }
 }
