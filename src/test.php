@@ -251,7 +251,7 @@ class Test
                     }
                 }
             } elseif ($type === 'string') {
-                if (!is_string($data)) {
+                if (!is_string($data) || (isset($schema['pattern']) && !preg_match($schema['pattern'], $data))) {
                     return false;
                 }
             } elseif ($type === 'integer') {
