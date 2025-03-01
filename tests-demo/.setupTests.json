@@ -1,0 +1,16 @@
+{
+    "urlBase": "http://api",
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "tests": {
+        "status_code_in": [
+            200,
+            201
+        ],
+        "headers": {
+            "content-type": "application/json; charset=utf-8"
+        },
+        "response_time_max": 0.5
+    }
+}

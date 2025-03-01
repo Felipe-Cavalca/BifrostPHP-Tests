@@ -1,0 +1,90 @@
+[
+    {
+        "name": "Valida Endpoint Login",
+        "description": "Valida Endpoint Login através do OPTIONS",
+        "endpoint": "/auth/login",
+        "method": "OPTIONS",
+        "tests": {
+            "json_schema": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "Fields": {
+                                "type": "object",
+                                "required": true,
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "required": true,
+                                        "pattern": "^Email$"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "required": true,
+                                        "pattern": "^Texto$"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "name": "Login with ADM",
+        "description": "Loga com ADM",
+        "endpoint": "/auth/login",
+        "method": "POST",
+        "body": {
+            "email": "admin@dossier.com",
+            "password": "123456"
+        },
+        "store_response": {
+            "user_id": "response.data.id"
+        },
+        "tests": {
+            "status_code": 200,
+            "json_schema": {
+                "type": "object",
+                "properties": {
+                    "statusCode": {
+                        "type": "integer",
+                        "required": true
+                    },
+                    "isSuccess": {
+                        "type": "boolean",
+                        "required": true
+                    },
+                    "data": {
+                        "type": "object",
+                        "required": true,
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "required": true
+                            },
+                            "role": {
+                                "type": "string",
+                                "required": true
+                            }
+                        }
+                    }
+                }
+            },
+            "response_time_max": 0.9
+        }
+    },
+    {
+        "name": "Lista um usuário",
+        "description": "Lista um usuário com o id do usuário logado",
+        "endpoint": "/user/{{user_id}}",
+        "method": "GET",
+        "tests": {
+            "status_code": 200,
+            "response_time_max": 0.9
+        }
+    }
+]

@@ -1,0 +1,111 @@
+[
+    {
+        "name": "POST request with query",
+        "description": "This is a POST request with query test.",
+        "endpoint": "/66978b30-f556-4d1c-9fa4-2d79d075bb98",
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "query": {
+            "id": 5
+        },
+        "body": {
+            "name": "John",
+            "age": 30
+        },
+        "tests": {
+            "status_code": 200,
+            "status_code_in": [
+                200,
+                201
+            ],
+            "status_code_in_range": [
+                200,
+                300
+            ],
+            "headers": {
+                "content-type": "application/json",
+                "server": "nginx",
+                "aaa": "bbb"
+            },
+            "headers_contains": [
+                "content-type",
+                "authorization"
+            ],
+            "body": {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "age": 30,
+                "note": 20.3,
+                "isActive": true,
+                "address": {
+                    "street": "123 Main St",
+                    "city": "Anytown",
+                    "zipcode": "12345"
+                },
+                "tags": [
+                    "developer",
+                    "tester"
+                ]
+            },
+            "body_contains": [
+                "name"
+            ],
+            "body_contains_value": {
+                "name": "Felipe"
+            },
+            "json_schema": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "required": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "required": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "required": true,
+                        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+                    },
+                    "age": {
+                        "type": "integer"
+                    },
+                    "note": {
+                        "type": "number"
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    },
+                    "address": {
+                        "type": "object",
+                        "properties": {
+                            "street": {
+                                "type": "string",
+                                "required": true
+                            },
+                            "city": {
+                                "type": "string",
+                                "required": true
+                            },
+                            "zipcode": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "response_time_max": 0.9
+        }
+    }
+]
