@@ -50,12 +50,27 @@ class Index
 
             $tests = $this->getJsonFile($fileName);
 
-            foreach($tests as $test){
+            foreach ($tests as $test) {
                 $test = new Test($test);
-                $results[] = $test->runTest();
+                $resultTest = $test->runTest();
+                if (!empty($resultTest)) {
+                    $results[$fileName][$test->name] = $resultTest;
+                }
             }
         }
-        return $results;
+
+        if (empty($results)) {
+            return [
+                "status" => true,
+                "message" => "All tests passed successfully"
+            ];
+        }
+
+        return [
+            "status" => false,
+            "message" => "Some tests failed",
+            "results" => $results
+        ];
     }
 
     private function getJsonFile(string $name): array

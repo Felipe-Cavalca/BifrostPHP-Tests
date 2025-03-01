@@ -37,11 +37,20 @@ class Test
 
         $validate = $this->validate();
         if ($validate === true) {
-            $result[] = $this->validateResponse($this->curl());
+            $result = $this->validateResponse($this->curl());
         } else {
-            $result["status"] = false;
-            $result["message"] = $validate;
+            $result = [
+                "name" => "Validation",
+                "status" => false,
+                "message" => $validate
+            ];
         }
+
+        $result = array_filter($result, function ($item) {
+            return isset($item['status']) && $item['status'] === false;
+        });
+
+        $result = array_column($result, null, 'name');
 
         return $result;
     }
