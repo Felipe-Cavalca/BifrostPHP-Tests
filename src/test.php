@@ -18,7 +18,7 @@ class Test
     public function __construct(array $setup)
     {
         $this->config = Config::getInstance();
-        $this->setup = $this->array_merge_recursive_distinct($this->config->settings, $setup);
+        $this->setup = $this->replacePlaceholders($this->array_merge_recursive_distinct($this->config->settings, $setup));
     }
 
     public function __get($name)
@@ -37,7 +37,9 @@ class Test
 
         $validate = $this->validate();
         if ($validate === true) {
-            $result = $this->validateResponse($this->curl());
+            $response = $this->curl();
+            $result = $this->validateResponse($response);
+            $this->saveParams($response);
         } else {
             $result = [
                 "name" => "Validation",
@@ -309,5 +311,42 @@ class Test
         }
 
         return $merged;
+    }
+
+    private function getNestedValue(array $array, string $path)
+    {
+        $keys = explode('.', $path); // Quebra o caminho "data.id" em ["data", "id"]
+        foreach ($keys as $key) {
+            if (!isset($array[$key])) {
+                return null; // Retorna null se o caminho não existir
+            }
+            $array = $array[$key];
+        }
+        return $array;
+    }
+
+    private function saveParams(array $result): void
+    {
+        if (isset($this->setup["store_response"])) {
+            foreach ($this->setup["store_response"] as $key => $store) {
+                $this->config->saveParam($key, $this->getNestedValue($result, $store));
+            }
+        }
+    }
+
+    private function replacePlaceholders(array $data): array
+    {
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                // Substitui todas as ocorrências de {{variavel}}
+                $data[$key] = preg_replace_callback('/\{\{(.+?)\}\}/', function ($matches) {
+                    $variableName = $matches[1];
+                    return $this->config->getParam($variableName) ?? $matches[0]; // Mantém original se não existir
+                }, $value);
+            } elseif (is_array($value)) {
+                $data[$key] = $this->replacePlaceholders($value);
+            }
+        }
+        return $data;
     }
 }
