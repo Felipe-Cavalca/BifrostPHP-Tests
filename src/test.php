@@ -219,7 +219,7 @@ class Test
             }
             foreach ($this->tests["body_contains_value"] as $key => $value) {
                 $resultTests[] = [
-                    "name" => "Body Contains Value " . $value . " in " . $key,
+                    "name" => "Body Contains Value " . (is_array($value) ? json_encode($value) : $value) . " in " . $key,
                     "status" => isset($response["response"][$key]) && $response["response"][$key] == $value,
                     "expected" => $value,
                     "received" => $response["response"][$key] ?? null
