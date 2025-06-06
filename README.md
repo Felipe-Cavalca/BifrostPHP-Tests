@@ -1,14 +1,15 @@
-# BifrostPHP - Test Module
+# BifrostPHP - Módulo de Testes
 
-Este repositório contém um framework de testes para requisições HTTP, permitindo a definição e execução de testes através de arquivos JSON de forma dinâmica e reutilizável.
+Este projeto fornece um pequeno framework em PHP para realizar testes de integração de APIs HTTP. Os cenários de testes são descritos em arquivos JSON e executados de forma automatizada dentro de um contêiner Docker.
 
-## 🛠️ Configuração
+## Requisitos
 
-1. Arquivo de Configuração: `.setupTests.json`
+- Docker e Docker Compose instalados.
 
-Este arquivo define configurações globais dos testes, como a URL base, cabeçalhos padrão e parâmetros de validação.Essas configurações serão aplicadas a todos os testes, mas cada teste pode sobrescrevê-las individualmente, conforme necessário.
+## Configuração Inicial
 
-Exemplo:
+Crie um arquivo `.setupTests.json` no diretório de testes com as configurações padrão que serão aplicadas a todos os cenários:
+
 ```json
 {
     "urlBase": "http://api",
@@ -25,18 +26,43 @@ Exemplo:
 }
 ```
 
-## 🔥 Estrutura dos Testes
+## Estrutura de um Cenário de Teste
 
-Os testes são definidos em arquivos JSON e seguem um formato padronizado. Cada teste pode conter:
+Cada arquivo JSON dentro do diretório `/tests` contém um array com definições de testes. Os campos principais de cada teste são:
 
-* Url base
-* Nome e descrição
-* Endpoint e método HTTP
-* Cabeçalhos, query params e corpo da requisição
-* Regras de validação
-* Armazenamento de valores para reutilização em testes futuros
+- `name` e `description`: identificação do teste.
+- `endpoint` e `method`: caminho e método HTTP da requisição.
+- `headers`, `query` e `body`: informações enviadas na requisição.
+- `tests`: regras de validação da resposta.
+- `store_response`: mapa de valores da resposta que serão reutilizados em testes seguintes.
 
-# 📌 Exemplo de Teste
+### Tipos de Validação
+
+Dentro da chave `tests` você pode utilizar diversas regras:
+
+- `status_code`: código HTTP exato esperado.
+- `status_code_in`: lista de códigos possíveis.
+- `status_code_in_range`: intervalo de códigos permitidos.
+- `headers`: verifica o valor de cabeçalhos específicos.
+- `headers_contains`: garante que determinados cabeçalhos existam.
+- `body`: compara o corpo da resposta com o JSON informado.
+- `body_contains`: checa se campos específicos estão presentes.
+- `body_contains_value`: valida valores de campos do corpo.
+- `json_schema`: estrutura esperada para o corpo em formato JSON Schema.
+- `response_time_max`: tempo máximo (segundos) para a resposta.
+
+## Reutilização de Dados
+
+Valores armazenados em `store_response` podem ser referenciados em outros cenários usando o formato `{{nome_da_variavel}}` em qualquer campo do teste.
+
+## Executando os Testes
+
+1. Coloque seus arquivos de cenário dentro do diretório `tests` (o repositório inclui `tests-demo` apenas como exemplo).
+2. Execute `docker-compose up -d` para iniciar o contêiner.
+3. Acesse `http://localhost:81` para ver o resultado em formato JSON. Caso todos os testes passem, uma mensagem de sucesso será exibida.
+
+### Exemplo Simplificado
+
 ```json
 [
     {
@@ -45,7 +71,7 @@ Os testes são definidos em arquivos JSON e seguem um formato padronizado. Cada 
         "endpoint": "/auth/login",
         "method": "POST",
         "body": {
-            "email": "test@email.com",
+            "email": "admin@dossier.com",
             "password": "123456"
         },
         "store_response": {
@@ -56,47 +82,26 @@ Os testes são definidos em arquivos JSON e seguem um formato padronizado. Cada 
             "json_schema": {
                 "type": "object",
                 "properties": {
-                    "statusCode": { "type": "integer", "required": true },
-                    "isSuccess": { "type": "boolean", "required": true },
                     "data": {
-                        "type": "object", "required": true,
+                        "type": "object",
                         "properties": {
-                            "id": { "type": "string", "required": true },
-                            "role": { "type": "string", "required": true }
+                            "id": { "type": "string", "required": true }
                         }
                     }
                 }
-            },
-            "response_time_max": 0.9
+            }
         }
     },
     {
-        "name": "Lista um usuário",
-        "description": "Lista um usuário apartir do id",
+        "name": "Lista usuário",
+        "description": "Consulta dados do usuário logado",
         "endpoint": "/user/{{user_id}}",
         "method": "GET",
         "tests": {
-            "status_code": 200,
-            "response_time_max": 0.9
+            "status_code": 200
         }
     }
 ]
 ```
 
-## 🔄 Reutilização de Valores entre Testes
-
-O framework permite armazenar valores da resposta de uma requisição e usá-los em testes futuros.
-
-### Exemplo:
-
-O teste de login armazena `user_id` da resposta.
-
-O próximo teste usa `{{user_id}}` para acessar o perfil do usuário logado.
-
-## 🚀 Execução dos Testes
-
-Os testes são executados via HTTP. Basta acessar localhost:81 para obter um JSON com os resultados dos testes que falharam. Caso todos os testes sejam bem-sucedidos, a resposta conterá apenas uma mensagem de sucesso.
-
----
-
-Este framework facilita a automação de testes de APIs RESTful, garantindo consistência e reutilização de dados de maneira eficiente.
+Este módulo facilita a automação de testes de APIs REST, permitindo criar cenários complexos de maneira simples e reaproveitar valores entre eles.
